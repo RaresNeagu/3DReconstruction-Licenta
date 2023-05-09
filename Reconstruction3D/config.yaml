@@ -1,0 +1,72 @@
+checkpoint: null
+checkpoint_dir: checkpoints
+dataset:
+  camera_c:
+  - 111.5
+  - 111.5
+  camera_f:
+  - 248.0
+  - 248.0
+  mesh_pos:
+  - 0.0
+  - 0.0
+  - -0.8
+  name: shapenet
+  normalization: true
+  num_classes: 13
+  predict:
+    folder: /tmp
+  shapenet: {}
+  subset_eval: test_small
+  subset_train: train_small
+log_dir: logs
+log_level: info
+loss:
+  weights:
+    chamfer:
+    - 1.0
+    - 1.0
+    - 1.0
+    chamfer_opposite: 1.0
+    constant: 1.0
+    edge: 0.3
+    laplace: 0.5
+    move: 0.1
+    normal: 0.00016
+    reconst: 0.0
+model:
+  coord_dim: 3
+  graphconv_activation: true
+  hidden_dim: 192
+  last_hidden_dim: 192
+  z_threshold: 0
+name: Reconstruction3D
+num_gpus: 1
+num_workers: 1
+optim:
+  adam: 0.9
+  lr: 5.0e-05
+  lr_factor: 0.1
+  lr_step:
+  - 30
+  - 45
+  name: adam
+  sgd_momentum: 0.9
+  wd: 1.0e-06
+pin_memory: true
+summary_dir: summary
+test:
+  batch_size: 4
+  dataset: []
+  shuffle: false
+  summary_steps: 50
+  weighted_mean: false
+train:
+  batch_size: 4
+  checkpoint_steps: 1000
+  num_epochs: 50
+  shuffle: true
+  summary_steps: 50
+  test_epochs: 1
+  use_augmentation: true
+version: null
