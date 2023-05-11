@@ -53,13 +53,7 @@ class Predictor(Runner):
         batch_size = inputs["images"].size(0)
         for i in range(batch_size):
             basename, ext = os.path.splitext(inputs["filepath"][i])
-            mesh_center = np.mean(outputs["pred_coord_before_deform"][0][i].cpu().numpy(), 0)
             verts = [outputs["pred_coord"][k][i].cpu().numpy() for k in range(3)]
-            verts_concat = np.concatenate(verts)
-            mesh1 = basename+".obj"
-            vert_v1=np.hstack((np.full([verts_concat.shape[0],1],"v"),verts_concat))
-            mesh2=np.vstack((vert_v1,self.ellipsoid.obj_fmt_faces[0]))
-            np.savetxt(mesh1,mesh2,fmt='%s',delimiter=" ")
             for k, vert in enumerate(verts):
                 meshname = basename + ".%d.obj" % (k + 1)
                 vert_v = np.hstack((np.full([vert.shape[0], 1], "v"), vert))

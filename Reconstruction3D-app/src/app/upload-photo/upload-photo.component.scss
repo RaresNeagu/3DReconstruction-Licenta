@@ -1,0 +1,40 @@
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    
+  }
+  
+  h1 {
+    font-size: 2em;
+    margin-bottom: 1em;
+  }
+  
+  .input-wrapper {
+    display: inline-block;
+    margin-bottom: 1em;
+  }
+  
+  label {
+    font-size: 1.2em;
+    padding: 1em;
+    background-color: #e6e6e6;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  input[type="file"] {
+    display: none;
+  }
+  
+  .canvas-wrapper {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  canvas {
+    max-width: 100%;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px #ccc;
+  }
+  

@@ -21,7 +21,7 @@ options.log_dir = "logs"
 options.log_level = "info"
 options.summary_dir = "summary"
 options.checkpoint_dir = "checkpoints"
-options.checkpoint = "C:/licenta/Reconstruction3D/checkpoints/Reconstruction3D/0422221526/323568_000032.pt"
+options.checkpoint = "C:/licenta/Reconstruction3D/checkpoints/Reconstruction3D/0422221526/389244_000038.pt"
 
 options.dataset = edict()
 options.dataset.name = "shapenet"
