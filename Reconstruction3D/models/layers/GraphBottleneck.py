@@ -3,6 +3,7 @@ import torch.nn.functional as F
 
 from models.layers.GraphConv import GraphConv
 
+
 class GraphResBlock(nn.Module):
 
     def __init__(self, in_dim, hidden_dim, adj_mat, activation=None):
@@ -23,14 +24,14 @@ class GraphResBlock(nn.Module):
         return (inputs + x) * 0.5
 
 
-
 class GraphBottleneck(nn.Module):
 
     def __init__(self, block_num, in_dim, hidden_dim, out_dim, adj_mat, activation=None):
         super(GraphBottleneck, self).__init__()
 
-        resblock_layers = [GraphResBlock(in_dim=hidden_dim, hidden_dim=hidden_dim, adj_mat=adj_mat, activation=activation)
-                           for _ in range(block_num)]
+        resblock_layers = [
+            GraphResBlock(in_dim=hidden_dim, hidden_dim=hidden_dim, adj_mat=adj_mat, activation=activation)
+            for _ in range(block_num)]
         self.blocks = nn.Sequential(*resblock_layers)
         self.conv1 = GraphConv(in_features=in_dim, out_features=hidden_dim, adj_mat=adj_mat)
         self.conv2 = GraphConv(in_features=hidden_dim, out_features=out_dim, adj_mat=adj_mat)
