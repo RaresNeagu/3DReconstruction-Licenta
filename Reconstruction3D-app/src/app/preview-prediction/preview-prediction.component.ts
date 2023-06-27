@@ -8,6 +8,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 @Component({
   selector: 'app-preview-prediction',
   templateUrl: './preview-prediction.component.html',
@@ -29,8 +31,13 @@ export class PreviewPredictionComponent implements OnInit, OnChanges {
 
     const scene = new THREE.Scene();
 
-    const material = new THREE.MeshBasicMaterial({ color: 0x808080 });
-
+    const material = new THREE.MeshBasicMaterial({
+      color: 0x808080,
+      side: THREE.DoubleSide,
+    });
+    material.depthWrite = true;
+    material.depthTest = true;
+    material.blendEquationAlpha = THREE.AddEquation;
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
@@ -46,20 +53,15 @@ export class PreviewPredictionComponent implements OnInit, OnChanges {
     } else {
       box = new THREE.Mesh(new THREE.BoxGeometry(5.5, 5.5, 5.5), material);
     }
-
+    box.geometry.computeTangents();
     scene.add(box);
 
     const canvasSizes = {
-      width: 700,
+      width: 1000,
       height: 500,
     };
 
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      canvasSizes.width / canvasSizes.height,
-      0.001,
-      1000
-    );
+    const camera = new THREE.PerspectiveCamera(75, 300 / 300, 0.001, 1000);
     camera.position.z = 30;
     scene.add(camera);
 
@@ -72,20 +74,11 @@ export class PreviewPredictionComponent implements OnInit, OnChanges {
     });
     renderer.setClearColor(0xe232222, 1);
     renderer.setSize(canvasSizes.width, canvasSizes.height);
-
-    const clock = new THREE.Clock();
-
+    const controls = new OrbitControls(camera, renderer.domElement);
     const animateGeometry = () => {
-      const elapsedTime = clock.getElapsedTime();
-
-      // Update animaiton objects
-      box.rotation.y = elapsedTime;
-
-      // Render
-      renderer.render(scene, camera);
-
-      // Call tick again on the next frame
+      controls.update();
       window.requestAnimationFrame(animateGeometry);
+      renderer.render(scene, camera);
     };
 
     animateGeometry();
@@ -105,7 +98,9 @@ export class PreviewPredictionComponent implements OnInit, OnChanges {
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         if (line[0] === 'v') {
-          const values = line.split(' ').map((v) => parseFloat(v));
+          const values = line
+            .split(' ')
+            .map((v) => new Float32Array([parseFloat(v)]));
           positions.push(values[1], values[2], values[3]);
         } else if (line[0] === 'f') {
           const values = line.split(' ').map((v) => parseInt(v));
@@ -120,6 +115,10 @@ export class PreviewPredictionComponent implements OnInit, OnChanges {
       );
       geometry.computeVertexNormals();
       geometry.scale(30.0, 30.0, 30.0);
+      geometry.computeBoundingBox();
+      geometry.center();
+      geometry.computeBoundingSphere();
+      geometry.setDrawRange(0, indices.length);
       this.createThreeJsBox(geometry);
     };
   }

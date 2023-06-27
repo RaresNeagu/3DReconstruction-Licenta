@@ -23,6 +23,7 @@
     "@types/three": "^0.152.0",
     "rxjs": "~7.5.0",
     "three": "^0.152.2",
+    "three-orbitcontrols": "^2.110.3",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },

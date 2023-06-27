@@ -15,7 +15,7 @@ dataset:
   normalization: true
   num_classes: 13
   predict:
-    folder: /tmp
+    folder: /predictions
   shapenet: {}
   subset_eval: test_small
   subset_train: train_small

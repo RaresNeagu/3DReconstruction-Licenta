@@ -3,7 +3,7 @@ import os
 
 
 def create_logger(cfg, phase='train'):
-    log_file = '{}_{}.log'.format(cfg.version, phase)
+    log_file = '{}_{}.log'.format(cfg.log_dir,phase)
     final_log_file = os.path.join(cfg.log_dir, log_file)
     head = '%(asctime)-15s %(message)s'
     logging.basicConfig(filename=str(final_log_file), format=head)

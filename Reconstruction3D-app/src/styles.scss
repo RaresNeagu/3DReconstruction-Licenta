@@ -1,4 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; background-color: beige;}
+body {
+    font-family: "Courier New", monospace;
+    margin: 0;
+    padding: 0;
+    background-color: #fffaf0;
+    background-image: url('C:/licenta/Reconstruction3D-app/src/assets/bg3.jpeg');
+    background-position: center;
+  }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

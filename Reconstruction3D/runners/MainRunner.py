@@ -10,7 +10,8 @@ import config
 from torch.utils.data.dataloader import default_collate
 
 from runners.Checkpoint import Checkpoints
-from runners.dataset import ShapeNet, get_shapenet_collate, ShapeNetImageFolder,shapenet_collate
+from runners.dataset import ShapeNet, get_shapenet_collate, ShapeNetImageFolder, SingleImageDataset
+
 
 class Runner:
     def __init__(self, options, logger: Logger,
@@ -32,31 +33,31 @@ class Runner:
             self.gpus = list(range(self.options.num_gpus))
             logger.info("Using GPUs: " + str(self.gpus))
 
-        # initialize dataset
         if dataset is None:
-            dataset = options.dataset  # useful during training
+            dataset = options.dataset
         self.dataset = self.load_dataset(dataset, training)
         self.dataset_collate_fn = self.load_collate_fn(dataset)
 
-        # by default, epoch_count = step_count = 0
         self.epoch_count = self.step_count = 0
         self.time_start = time.time()
 
         self.logger.info("Running model initialization...")
-        if(training==False):
+        if (training == False):
             self.init_fn()
-        # checkpoint is loaded if any
+
         self.saver = Checkpoints(self.logger, checkpoint_dir=str(self.options.checkpoint_dir),
-                                     checkpoint_file=self.options.checkpoint)
+                                 checkpoint_file=self.options.checkpoint)
         self.init_with_checkpoint()
 
     def load_dataset(self, dataset, training):
         self.logger.info("Loading dataset: %s" % dataset.name)
         if dataset.name == "shapenet":
             return ShapeNet(config.SHAPENET_ROOT, dataset.subset_train if training else dataset.subset_eval,
-                            dataset.mesh_pos, dataset.normalization, dataset.shapenet)
+                            dataset.mesh_pos, dataset.normalization)
         elif dataset.name == "shapenet_demo":
-            return ShapeNetImageFolder(dataset.predict.folder,dataset.normalization,dataset.shapenet)
+            return ShapeNetImageFolder(dataset.predict.folder, dataset.normalization)
+        elif dataset.name == "single_image":
+            return SingleImageDataset(dataset.predict.path, dataset.normalization)
         raise NotImplementedError("Unsupported dataset")
 
     def load_collate_fn(self, dataset):
@@ -109,7 +110,7 @@ class Runner:
         if self.optimizers_dict() is not None:
             for optimizer_name, optimizer in self.optimizers_dict().items():
                 checkpoint[optimizer_name] = optimizer.state_dict()
-        self.saver.save_checkpoint(checkpoint, "%06d_%06d" % (self.step_count, self.epoch_count))
+        self.saver.save_checkpoint(checkpoint, "%06d_%06d" % (self.step_count, self.epoch_count) + "ResNet50")
 
     @property
     def time_elapsed(self):

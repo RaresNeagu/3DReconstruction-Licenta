@@ -2,7 +2,6 @@ from logging import Logger
 
 import numpy as np
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from runners.MainRunner import Runner
@@ -17,11 +16,9 @@ class Evaluator(Runner):
     def __init__(self, options, logger: Logger):
         super().__init__(options, logger, training=False)
 
-    def init_fn(self, **kwargs):
+    def init_fn(self):
         self.chamfer = ChamferDist()
         self.ellipsoid = Ellipsoid(self.options.dataset.mesh_pos)
-        self.weighted_mean = self.options.test.weighted_mean
-        self.num_classes = self.options.dataset.num_classes
 
 
         self.model = Reconstruction3D(self.options.model, self.ellipsoid,
@@ -47,10 +44,10 @@ class Evaluator(Runner):
             gt_length = gt_points[i].size(0)
             label = labels[i].cpu().item()
             d1, d2, i1, i2 = self.chamfer(pred_vertices[i].unsqueeze(0), gt_points[i].unsqueeze(0))
-            d1, d2 = d1.cpu().numpy(), d2.cpu().numpy()  # convert to millimeter
-            self.chamfer_distance[label].update(np.mean(d1) + np.mean(d2))
-            self.f1_tau[label].update(self.evaluate_f1(d1, d2, pred_length, gt_length, 1E-4))
-            self.f1_2tau[label].update(self.evaluate_f1(d1, d2, pred_length, gt_length, 2E-4))
+            d1, d2 = d1.cpu().numpy(), d2.cpu().numpy()
+            self.chamfer_distance.update(np.mean(d1) + np.mean(d2))
+            self.f1_tau.update(self.evaluate_f1(d1, d2, pred_length, gt_length, 1E-4))
+            self.f1_2tau.update(self.evaluate_f1(d1, d2, pred_length, gt_length, 2E-4))
 
     def evaluate_step(self, input_batch):
         self.model.eval()
@@ -80,9 +77,9 @@ class Evaluator(Runner):
                                       shuffle=self.options.test.shuffle,
                                       collate_fn=self.dataset_collate_fn)
 
-        self.chamfer_distance = [AverageMeter() for _ in range(self.num_classes)]
-        self.f1_tau = [AverageMeter() for _ in range(self.num_classes)]
-        self.f1_2tau = [AverageMeter() for _ in range(self.num_classes)]
+        self.chamfer_distance = AverageMeter()
+        self.f1_tau = AverageMeter()
+        self.f1_2tau = AverageMeter()
 
         for step, batch in enumerate(test_data_loader):
             batch = {k: v.cuda() if isinstance(v, torch.Tensor) else v for k, v in batch.items()}
@@ -90,7 +87,7 @@ class Evaluator(Runner):
             out = self.evaluate_step(batch)
 
             if self.evaluate_step_count % self.options.test.summary_steps == 0:
-                self.evaluate_summaries(batch, out)
+                self.evaluate_summaries()
 
             self.evaluate_step_count += 1
             self.total_step_count += 1
@@ -101,26 +98,14 @@ class Evaluator(Runner):
                 scalar = val.avg
             self.logger.info("Test [%06d] %s: %.6f" % (self.total_step_count, key, scalar))
 
-    def average_of_average_meters(self, average_meters):
-        s = sum([meter.sum for meter in average_meters])
-        c = sum([meter.count for meter in average_meters])
-        weighted_avg = s / c if c > 0 else 0.
-        avg = sum([meter.avg for meter in average_meters]) / len(average_meters)
-        ret = AverageMeter()
-        if self.weighted_mean:
-            ret.val, ret.avg = avg, weighted_avg
-        else:
-            ret.val, ret.avg = weighted_avg, avg
-        return ret
-
     def get_result_summary(self):
         return {
-                "cd": self.average_of_average_meters(self.chamfer_distance),
-                "f1_tau": self.average_of_average_meters(self.f1_tau),
-                "f1_2tau": self.average_of_average_meters(self.f1_2tau),
+                "cd": self.chamfer_distance,
+                "f1_tau": self.f1_tau,
+                "f1_2tau": self.f1_2tau,
             }
 
-    def evaluate_summaries(self, input_batch, out_summary):
+    def evaluate_summaries(self):
         self.logger.info("Test Step %06d/%06d (%06d) " % (self.evaluate_step_count,
                                                           len(self.dataset) // (
                                                                   self.options.num_gpus * self.options.test.batch_size),

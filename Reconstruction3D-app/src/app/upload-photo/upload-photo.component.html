@@ -1,20 +1,30 @@
-<div class="container">
+<header>
   <h1>Upload photo and view the 3d reconstruction</h1>
-  <div class="input-wrapper">
-    <label for="image-upload">Choose an image:</label>
-    <input type="file" id="image-upload" (change)="onChangePhoto($event)" />
+</header>
+<mat-spinner *ngIf="showSpinner" class="spinner" [color]="525e75"></mat-spinner>
+<main>
+  <div class="upload-section">
+    <input
+      type="file"
+      id="image-upload"
+      class="upload-button"
+      (change)="onChangePhoto($event)"
+    />
   </div>
-  <div class="canvas-wrapper">
+
+  <div class="viewer-container">
     <app-preview-prediction
       id="image-canvas"
       [objFile]="obj"
+      class="viewer"
     ></app-preview-prediction>
   </div>
   <a
     *ngIf="objUrl"
     [href]="objUrl"
-    class="download-link"
     download="prediction.obj"
+    class="download-button"
+    id="download"
     >Download OBJ for better quality</a
   >
-</div>
+</main>

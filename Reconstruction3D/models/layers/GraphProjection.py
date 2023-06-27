@@ -26,34 +26,29 @@ class GraphProjection(nn.Module):
     def image_feature_shape(img):
         return np.array([img.size(-1), img.size(-2)])
 
-
     def forward(self, resolution, img_features, inputs):
         half_resolution = (resolution - 1) / 2
         camera_c_offset = np.array(self.camera_c) - half_resolution
-        # map to [-1, 1]
-        # not sure why they render to negative x
         positions = inputs + torch.tensor(self.mesh_pos, device=inputs.device, dtype=torch.float)
         w = -self.camera_f[0] * (positions[:, :, 0] / self.bound_val(positions[:, :, 2])) + camera_c_offset[0]
         h = self.camera_f[1] * (positions[:, :, 1] / self.bound_val(positions[:, :, 2])) + camera_c_offset[1]
 
-        # directly do clamping
         w /= half_resolution[0]
         h /= half_resolution[1]
 
-        # clamp to [-1, 1]
         w = torch.clamp(w, min=-1, max=1)
         h = torch.clamp(h, min=-1, max=1)
 
         feats = [inputs]
         for img_feature in img_features:
-            feats.append(self.project(resolution, img_feature, torch.stack([w, h], dim=-1)))
+            feats.append(self.project( img_feature, torch.stack([w, h], dim=-1)))
 
         output = torch.cat(feats, 2)
 
         return output
 
-    def project(self, img_shape, img_feat, sample_points):
-        output = F.grid_sample(img_feat, sample_points.unsqueeze(1),align_corners=True)
+    def project(self, img_feat, sample_points):
+        output = F.grid_sample(img_feat, sample_points.unsqueeze(1), align_corners=True)
         output = torch.transpose(output.squeeze(2), 1, 2)
 
         return output

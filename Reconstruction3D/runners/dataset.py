@@ -1,7 +1,5 @@
 from torch.utils.data.dataset import Dataset
 from torchvision.transforms import Normalize
-
-import config
 import json
 import os
 import pickle
@@ -23,13 +21,13 @@ class BaseDataset(Dataset):
 
 class ShapeNet(BaseDataset):
 
-    def __init__(self, file_root, file_list_name, mesh_pos, normalization, shapenet_options):
+    def __init__(self, file_root, file_list_name, mesh_pos, normalization):
         super().__init__()
         self.file_root = file_root
         with open(os.path.join(self.file_root, "shapenet.json"), "r") as fp:
             self.labels_map = sorted(list(json.load(fp).keys()))
         self.labels_map = {k: i for i, k in enumerate(self.labels_map)}
-        # Read file list
+
         with open(os.path.join(self.file_root, file_list_name + ".txt"), "r") as fp:
             self.file_names = fp.read().split("\n")[:-1]
         self.normalization = normalization
@@ -71,13 +69,13 @@ class ShapeNet(BaseDataset):
 
 class ShapeNetImageFolder(BaseDataset):
 
-    def __init__(self, folder, normalization, shapenet_options):
+    def __init__(self, folder, normalization):
         super().__init__()
         self.normalization = normalization
         self.file_list = []
         for fl in os.listdir(folder):
             file_path = os.path.join(folder, fl)
-            # check image before hand
+
             try:
                 if file_path.endswith(".gif"):
                     raise ValueError("gif's are results. Not acceptable")
@@ -90,7 +88,7 @@ class ShapeNetImageFolder(BaseDataset):
         img_path = self.file_list[item]
         img = io.imread(img_path)
 
-        if img.shape[2] > 3:  # has alpha channel
+        if img.shape[2] > 3:
             img[np.where(img[:, :, 3] == 0)] = 255
 
         img = transform.resize(img, (config.IMG_SIZE, config.IMG_SIZE))
@@ -108,6 +106,39 @@ class ShapeNetImageFolder(BaseDataset):
     def __len__(self):
         return len(self.file_list)
 
+class SingleImageDataset(BaseDataset):
+
+        def __init__(self, img_path, normalization):
+            super().__init__()
+            self.normalization = normalization
+            try:
+                if img_path.endswith(".gif"):
+                    raise ValueError("gif's are results. Not acceptable")
+                Image.open(img_path)
+                self.img_path = img_path
+            except (IOError, ValueError):
+                print("=> Ignoring %s because it's not a valid image" % img_path)
+
+        def __getitem__(self, item):
+            img = io.imread(self.img_path)
+
+            if img.shape[2] > 3:
+                img[np.where(img[:, :, 3] == 0)] = 255
+
+            img = transform.resize(img, (config.IMG_SIZE, config.IMG_SIZE))
+            img = img[:, :, :3].astype(np.float32)
+
+            img = torch.from_numpy(np.transpose(img, (2, 0, 1)))
+            img_normalized = self.normalize_img(img) if self.normalization else img
+
+            return {
+                "images": img_normalized,
+                "images_orig": img,
+                "filepath": self.img_path
+            }
+
+        def __len__(self):
+            return 1
 
 def shapenet_collate(batch):
     if len(batch) > 1:

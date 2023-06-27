@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import numpy as np
 
 
 class GraphUnpooling(nn.Module):
@@ -8,7 +7,7 @@ class GraphUnpooling(nn.Module):
     def __init__(self, unpool_idx):
         super(GraphUnpooling, self).__init__()
         self.unpool_idx = unpool_idx
-        # save dim info
+
         self.in_num = torch.max(unpool_idx).item()
         self.out_num = self.in_num + len(unpool_idx)
 

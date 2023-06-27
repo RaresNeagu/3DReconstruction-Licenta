@@ -1,40 +1,136 @@
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    text-align: center;
-    
-  }
-  
-  h1 {
-    font-size: 2em;
-    margin-bottom: 1em;
-  }
-  
-  .input-wrapper {
-    display: inline-block;
-    margin-bottom: 1em;
-  }
-  
-  label {
-    font-size: 1.2em;
-    padding: 1em;
-    background-color: #e6e6e6;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  input[type="file"] {
-    display: none;
-  }
-  
-  .canvas-wrapper {
-    max-width: 100%;
-    height: auto;
-  }
-  
-  canvas {
-    max-width: 100%;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 5px #ccc;
-  }
-  
+@keyframes backgroundAnimation {
+  0% { background-position: center center; }
+  50% { background-position: right bottom; }
+  100% { background-position: center center; }
+}
+
+@keyframes headerAnimation {
+  0% { opacity: 0; transform: translateY(-20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes uploadSectionAnimation {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes buttonAnimation {
+  0% { opacity: 0; transform: scale(0.8); }
+   100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes viewerContainerAnimation {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes viewerAnimation {
+  0% { transform: scale(0.9); }
+  100% { transform: scale(1.1); }
+}
+
+@keyframes downloadButtonAnimation {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+
+
+header {
+  background-color: #F1DDBF;
+  padding: 20px;
+  text-align: center;
+  animation: headerAnimation 1s ease-in-out;
+}
+
+h1 {
+  color: #525E75;
+  font-size: 40px;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  animation: mainAnimation 1s ease-in-out;
+}
+
+.upload-section {
+  text-align: center;
+  margin-bottom: 30px;
+  animation: uploadSectionAnimation 1s ease-in-out;
+}
+
+h2 {
+  color: #525E75;
+  font-size: 24px;
+  margin: 0;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.upload-button {
+  background-color: #F1DDBF;
+  color: #525E75;
+  border: none;
+  padding: 12px 24px;
+  margin-top: 24px;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  letter-spacing: 2px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  animation: buttonAnimation 1s ease-in-out;
+}
+
+.viewer-container {
+  width: 1000px;
+  height: 500px;
+  background-color: #F1DDBF;
+  border: 5px solid #525E75;
+  margin-bottom: 30px;
+  overflow: hidden;
+  animation: viewerContainerAnimation 1s ease-in-out;
+}
+
+.viewer {
+  width: 1000px;
+  height: 500px;
+
+  background-position: center;
+  filter: sepia(70%) saturate(150%);
+  opacity: 0.8;
+  animation: viewerAnimation 1s ease-in-out infinite alternate;
+}
+
+.download-button {
+  background-color: #F1DDBF;
+  color: #525E75;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  letter-spacing: 2px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  animation: downloadButtonAnimation 1s ease-in-out;
+}
+ 
+.spinner{
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  -moz-transform: translateX(-45%) translateY(-50%);
+  -webkit-transform: translateX(-45%) translateY(-50%);
+  transform: translateX(-45%) translateY(-50%);
+  width: 100px;
+  height: 100px;
+  color: #525E75;
+}
